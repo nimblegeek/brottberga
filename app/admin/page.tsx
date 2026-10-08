@@ -1,10 +1,11 @@
-import { env } from "cloudflare:workers";
+import { serverPlatform } from "@/lib/server-platform";
 import { getChatGPTUser, chatGPTSignInPath } from "@/app/chatgpt-auth";
 import { database, pruneExpired } from "@/db/connection";
 export const dynamic="force-dynamic";
 export default async function Admin(){
+ if(!serverPlatform.trustsChatGPTHeaders)return <main className="admin-shell"><h1>Anmälningar</h1><p>Administrationen är inte aktiverad på den här webbplatsen.</p><a className="underlined" href="/">Till hemsidan</a></main>;
  const user=await getChatGPTUser();
- const allowlist=((env as unknown as Record<string,string>).ADMIN_EMAILS??"").toLowerCase().split(",").map(s=>s.trim()).filter(Boolean);
+ const allowlist=serverPlatform.adminEmails.toLowerCase().split(",").map(s=>s.trim()).filter(Boolean);
  if(!user)return <main className="admin-shell"><h1>Anmälningar</h1><p>Den här sidan är till för församlingens ansvariga.</p><a className="button olive" href={chatGPTSignInPath("/admin")} target="_top">Logga in med ChatGPT</a></main>;
  if(!allowlist.includes(user.email.toLowerCase()))return <main className="admin-shell"><h1>Anmälningar</h1><p>Ditt konto har inte tillgång till anmälningarna. En administratör behöver ge dig behörighet.</p><a className="underlined" href="/">Till hemsidan</a></main>;
  let entries: {id:string;name:string;email:string;kind:string;event_id:string|null;guests:number;created_at:number}[];

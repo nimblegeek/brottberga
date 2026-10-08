@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {upcomingGatherings} from '../lib/events.ts';
 import {registrationsEnabled} from '../lib/features.ts';
-const origin='http://127.0.0.1:5187';
+const origin=process.env.TEST_ORIGIN??'http://127.0.0.1:5187';
 const send=(body,headers={})=>fetch(origin+'/api/anmalan',{method:'POST',headers:{'content-type':'application/json',origin,...headers},body:JSON.stringify(body)});
 const base={requestId:crypto.randomUUID(),name:'Automatiskt lokalt test',email:'local-test@example.com',kind:'visit',eventId:upcomingGatherings()[0].id,guests:2,consent:true,website:''};
 if (!registrationsEnabled) {

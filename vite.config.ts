@@ -4,11 +4,14 @@ import hostingConfig from "./.openai/hosting.json";
 import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { sites } from "./build/sites-vite-plugin";
 import { connectorPreview } from "./build/connector-preview-plugin.mjs";
+import { fileURLToPath } from "node:url";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
 
 const { d1, r2 } = hostingConfig;
+const serverPlatformPath = fileURLToPath(new URL("./lib/server-platform.ts", import.meta.url));
+const sitesPlatformPath = fileURLToPath(new URL("./lib/server-platform.sites.ts", import.meta.url));
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
@@ -61,6 +64,17 @@ export default defineConfig(async ({ command }) => {
         : {}),
     },
     plugins: [
+      {
+        name: "sites-server-platform",
+        enforce: "pre",
+        // Vinext expands tsconfig paths before user aliases, so also match
+        // the absolute path passed on by its alias resolver.
+        resolveId(source: string) {
+          if (["@/lib/server-platform", serverPlatformPath, serverPlatformPath.slice(0, -3)].includes(source)) {
+            return sitesPlatformPath;
+          }
+        },
+      },
       vinext(),
       sites({ mockAuth: !managedLinux }),
       connectorPreview(),

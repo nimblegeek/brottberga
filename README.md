@@ -1,12 +1,28 @@
 # Brottberga församling
 
-Svensk, responsiv hemsida för en växande lokal församling på Brottberga Gård 1 i Västerås. Byggd med React, TypeScript och Vinext, med Cloudflare Workers och D1 via Sites.
+Svensk, responsiv hemsida för en växande lokal församling på Brottberga Gård 1 i Västerås. Byggd med React och TypeScript. Kan köras med Next.js på Vercel eller med Vinext, Cloudflare Workers och D1 via Sites.
 
 ## Aktuellt läge
 
 Anmälningar är pausade på användarens begäran. Startsidan visar ingen träff- eller intresseanmälan, WebMCP-anmälningsverktyget registreras inte och servern avvisar nya inskick utan att lagra uppgifter. Tider, adress och vägbeskrivning finns kvar. Budskapet betonar en växande församling med lovsång, healing och bibelstudier.
 
-`registrationsEnabled` i `lib/features.ts` styr pausen för både gränssnitt och server. Befintlig databas, skyddad administration och personliga borttagningslänkar finns kvar. Återaktivera först när användaren vill ta anmälningarna i bruk.
+`registrationsEnabled` i `lib/features.ts` styr pausen för både gränssnitt och server. På Sites finns befintlig databas, skyddad administration och personliga borttagningslänkar kvar. På Vercel är ingen databas eller administratörsinloggning ansluten. Återaktivera först när användaren vill ta anmälningarna i bruk och lagring och inloggning är konfigurerade för vald plattform.
+
+## Vercel
+
+Importera GitHub-repot med projektroten som Root Directory (katalogen som innehåller `package.json`). `vercel.json` väljer Next.js, byggkommandot `npm run build:vercel` och utmatningskatalogen `.next`. Bygget skapar den `routes-manifest.json` som Vercel behöver. Standardkommandot `npm run build` är fortfarande avsett för Sites och producerar `dist/`.
+
+För att prova samma Next.js-bygge lokalt, använd Node.js 22.13 eller senare:
+
+```sh
+npm ci
+npm run build:vercel
+npm run start:vercel -- --hostname 127.0.0.1 --port 5188
+```
+
+Använd `npm run dev:vercel` för utveckling med Next.js. Startsidan och svenska typsnitt fungerar utan miljövariabler. Anmälningar förblir pausade. `/admin` visar att administrationen inte är aktiverad, och inkommande ChatGPT-identitetshuvuden godtas inte som inloggning på Vercel. D1-data flyttas inte; tidigare borttagningslänkar ska fortsatt användas på den ursprungliga Sites-adressen.
+
+`lib/server-platform.ts` är standardmiljön för Next.js utan D1 eller Sites-inloggning. Vite ersätter den med `lib/server-platform.sites.ts` vid Sites-byggen, där befintliga bindningar och inloggning används.
 
 ## Funktioner (anmälningar förberedda för senare)
 
@@ -19,7 +35,7 @@ Anmälningar är pausade på användarens begäran. Startsidan visar ingen träf
 - `/admin`: anmälningar och nya kontakter. Kräver inloggning med ChatGPT och en uttrycklig tillåtelselista.
 - Mobilmeny, tangentbordsanvändbara dialoger, vanliga frågor, kartlänk och ett WebMCP-verktyg som öppnar anmälningsformuläret utan att skicka uppgifter.
 
-## Utveckling
+## Utveckling med Sites
 
 Använd Node.js 22.13 eller senare.
 
@@ -52,8 +68,11 @@ Träffarna antas återkomma varje vecka enligt briefen. Inget system för instä
 ```sh
 npx tsc --noEmit
 node --experimental-strip-types --test tests/events.test.mjs
-# Med lokal server och migrerad lokal D1:
+# Med lokal Sites-server (och migrerad D1 om anmälningar aktiverats):
 node --experimental-strip-types tests/api-smoke.mjs
+# Med Next.js-produktionsserver på port 5188:
+TEST_ORIGIN=http://localhost:5188 node --experimental-strip-types tests/api-smoke.mjs
+node tests/vercel-smoke.mjs
 ```
 
 När anmälningarna är pausade kontrollerar API-provet att båda typerna av inskick avvisas, att inga formulär eller anmälningsknappar visas och att det nya budskapet finns på startsidan. Vid aktiverade anmälningar körs de tidigare validerings- och lagringsproven med påhittade lokala uppgifter som sedan tas bort.

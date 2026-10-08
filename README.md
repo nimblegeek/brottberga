@@ -1,8 +1,14 @@
 # Brottberga församling
 
-Svensk, responsiv hemsida för en lokal församling på Brottberga Gård 1 i Västerås. Byggd med React, TypeScript och Vinext, med Cloudflare Workers och D1 via Sites.
+Svensk, responsiv hemsida för en växande lokal församling på Brottberga Gård 1 i Västerås. Byggd med React, TypeScript och Vinext, med Cloudflare Workers och D1 via Sites.
 
-## Funktioner
+## Aktuellt läge
+
+Anmälningar är pausade på användarens begäran. Startsidan visar ingen träff- eller intresseanmälan, WebMCP-anmälningsverktyget registreras inte och servern avvisar nya inskick utan att lagra uppgifter. Tider, adress och vägbeskrivning finns kvar. Budskapet betonar en växande församling med lovsång, healing och bibelstudier.
+
+`registrationsEnabled` i `lib/features.ts` styr pausen för både gränssnitt och server. Befintlig databas, skyddad administration och personliga borttagningslänkar finns kvar. Återaktivera först när användaren vill ta anmälningarna i bruk.
+
+## Funktioner (anmälningar förberedda för senare)
 
 - Presentation av gemenskapen och Pastor John Josephsson.
 - Kommande söndagar kl. 11.00 och torsdagar kl. 18.30, beräknade i Europe/Stockholm med korrekt sommar- och vintertid.
@@ -50,7 +56,7 @@ node --experimental-strip-types --test tests/events.test.mjs
 node --experimental-strip-types tests/api-smoke.mjs
 ```
 
-API-provet använder enbart påhittade lokala testuppgifter och tar bort sina egna poster. Det kontrollerar giltiga formulär, samtycke, passerade datum, korsdomänförsök, dubletter, borttagning och anonym åtkomst till admin.
+När anmälningarna är pausade kontrollerar API-provet att båda typerna av inskick avvisas, att inga formulär eller anmälningsknappar visas och att det nya budskapet finns på startsidan. Vid aktiverade anmälningar körs de tidigare validerings- och lagringsproven med påhittade lokala uppgifter som sedan tas bort.
 
 ## Bild
 

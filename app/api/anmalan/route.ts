@@ -1,9 +1,11 @@
 import { z } from "zod";
+import { registrationsEnabled } from "@/lib/features";
 import { database, hash, pruneExpired } from "@/db/connection";
 import { upcomingGatherings } from "@/lib/events";
 import { json, readBody, sameOrigin } from "@/lib/request";
 const schema=z.object({requestId:z.string().uuid(),name:z.string().trim().min(2).max(100),email:z.string().trim().email().max(254).transform(v=>v.toLowerCase()),kind:z.enum(["visit","interest"]),eventId:z.string().max(50).nullable(),guests:z.number().int().min(1).max(12),consent:z.literal(true),website:z.string().max(0)}).strict();
 export async function POST(request:Request){
+ if(!registrationsEnabled)return json({error:"Digitala anmälningar är pausade. Välkommen att besöka oss på Brottberga Gård.",code:"REGISTRATIONS_PAUSED"},503);
  if(!sameOrigin(request))return json({error:"Ladda om sidan och försök igen."},403);
  let input;try{input=schema.safeParse(await readBody(request));}catch{return json({error:"Kontrollera formuläret och försök igen."},400)}
  if(!input.success)return json({error:"Kontrollera namn, e-post, antal personer och samtycke."},400);

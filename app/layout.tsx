@@ -5,4 +5,4 @@ export const metadata: Metadata = {
  description: "En växande församling i Västerås med Jesus i centrum. Lovsång, healing och bibelstudier på Brottberga Gård 1. Söndagar 11.00 och torsdagar 18.30.",
  icons: {icon: "/favicon.svg", shortcut: "/favicon.svg"},
 };
-export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) { return <html lang="sv"><body>{children}</body></html>; }
+export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) { return <html lang="sv"><head><link rel="preload" href="/fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous"/></head><body>{children}</body></html>; }

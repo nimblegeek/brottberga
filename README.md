@@ -61,3 +61,7 @@ När anmälningarna är pausade kontrollerar API-provet att båda typerna av ins
 ## Bild
 
 `public/images/meadow.webp` är en AI-genererad stämningsbild av svensk landsbygd. Den föreställer inte Brottberga Gård eller församlingens medlemmar. Ersätt gärna med ett autentiskt foto. Inga påhittade foton av pastorn eller medlemmarna används.
+
+## Svenska tecken och typsnitt
+
+Brödtextens DM Sans levereras från `public/fonts/` via `app/fonts.css`, inklusive Latin- och Latin Extended-tecken. Å, ä och ö finns i Latin-filen. Rubriker använder Georgia för tydligare svenska diakritiska tecken. Ingen extern Google Fonts-förfrågan behövs. DM Sans OFL-licens finns i samma katalog. Sidans språk är svenska och texterna är UTF-8.

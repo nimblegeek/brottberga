@@ -1,0 +1,3 @@
+import { database, hash } from "@/db/connection";
+import { json, readBody, sameOrigin } from "@/lib/request";
+export async function DELETE(request:Request){if(!sameOrigin(request))return json({error:"Ladda om sidan och försök igen."},403);let token;try{token=(await readBody(request)).token}catch{return json({error:"Länken är ogiltig."},400)}if(typeof token!=="string"||!/^[a-f0-9-]{72}$/.test(token))return json({error:"Länken är ogiltig."},400);try{await database().prepare("DELETE FROM registrations WHERE delete_token_hash = ?").bind(await hash(token)).run();return json({ok:true})}catch{return json({error:"Det gick inte att ta bort uppgifterna just nu. Försök igen."},503)}}

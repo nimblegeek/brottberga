@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {upcomingGatherings} from '../lib/events.ts';
+const origin='http://127.0.0.1:5187';
+const send=(body,headers={})=>fetch(origin+'/api/anmalan',{method:'POST',headers:{'content-type':'application/json',origin,...headers},body:JSON.stringify(body)});
+const base={requestId:crypto.randomUUID(),name:'Automatiskt lokalt test',email:'local-test@example.com',kind:'visit',eventId:upcomingGatherings()[0].id,guests:2,consent:true,website:''};
+assert.equal((await send({...base,consent:false})).status,400);
+assert.equal((await send({...base,eventId:'sunday-2020-01-01'})).status,400);
+assert.equal((await send(base,{origin:'https://other.invalid'})).status,403);
+const created=await send(base);const body=await created.json();assert.equal(created.status,201,JSON.stringify(body));assert.ok(body.deleteToken);
+assert.equal((await send(base)).status,409);
+const removed=await fetch(origin+'/api/uppgifter',{method:'DELETE',headers:{'content-type':'application/json',origin},body:JSON.stringify({token:body.deleteToken})});assert.equal(removed.status,200);
+const interest=await send({...base,requestId:crypto.randomUUID(),kind:'interest',eventId:null});const interestData=await interest.json();assert.equal(interest.status,201,JSON.stringify(interestData));
+await fetch(origin+'/api/uppgifter',{method:'DELETE',headers:{'content-type':'application/json',origin},body:JSON.stringify({token:interestData.deleteToken})});
+const admin=await fetch(origin+'/admin');assert.match(await admin.text(),/Logga in med ChatGPT/);
+console.log('PASS: valid registration, interest, explicit consent, invalid date, cross-origin rejection, duplicate protection, deletion and anonymous admin gate. Test records removed.');
